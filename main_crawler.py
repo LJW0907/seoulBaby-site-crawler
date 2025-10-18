@@ -32,13 +32,21 @@ CRAWLER_CONFIGS = [
 
 
 def upload_to_s3(data, key):
-    # (이전과 동일한 코드)
+    """주어진 데이터를 JSON 형태로 S3에 업로드합니다."""
+    # [수정] GitHub Secret에 S3_BUCKET_NAME이 없을 경우를 대비하여 기본값("seoul-baby")을 사용합니다.
     bucket_name = os.environ.get("S3_BUCKET_NAME", "seoul-baby")
     s3_client = boto3.client("s3")
+
+    if not bucket_name:
+        print(
+            "❌ S3 Upload Failed: Bucket name is not set. Please set S3_BUCKET_NAME environment variable."
+        )
+        return False
+
     try:
         s3_client.put_object(
             Bucket=bucket_name,
-            Key=key,
+            Key=key,  # <-- CRAWLER_CONFIGS에 설정된 "dynamic_programs/..." 값이 여기에 사용됩니다.
             Body=json.dumps(data, ensure_ascii=False, indent=4).encode("utf-8"),
             ContentType="application/json; charset=utf-8",
         )
