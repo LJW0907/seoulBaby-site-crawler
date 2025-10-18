@@ -10,8 +10,9 @@ import os
 from crawler_seoul_agi import crawl_seoul_agi_education
 from crawler_seoul_agi_notice import crawl_seoul_agi_notices
 from crawler_childcare_go_kr import crawl_childcare_support_fund
+from crawler_seoul_momcare import crawl_seoul_momcare_notices
 
-# [핵심] 3개의 크롤러를 모두 실행하도록 설정
+# [핵심] 4개의 크롤러를 모두 실행하도록 설정
 CRAWLER_CONFIGS = [
     {
         "name": "서울 임신출산 정보센터 (보건소 교육)",
@@ -29,6 +30,12 @@ CRAWLER_CONFIGS = [
         "name": "아이사랑 (출산지원금-서울시)",
         "crawler_func": crawl_childcare_support_fund,
         "s3_key": "dynamic_programs/childcare_support_fund.json",
+        "enabled": True,
+    },
+    {
+        "name": "서울 맘케어 시스템 (공지사항)",
+        "crawler_func": crawl_seoul_momcare_notices,
+        "s3_key": "dynamic_programs/seoul_momcare_notices.json",
         "enabled": True,
     },
 ]
