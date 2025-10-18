@@ -8,7 +8,10 @@ import os
 # --- 설정(Configuration) 영역 ---
 
 from crawler_seoul_agi import crawl_seoul_agi_education
+from crawler_seoul_agi_notice import crawl_seoul_agi_notices
+from crawler_childcare_go_kr import crawl_childcare_support_fund
 
+# [핵심] 3개의 크롤러를 모두 실행하도록 설정
 CRAWLER_CONFIGS = [
     {
         "name": "서울 임신출산 정보센터 (보건소 교육)",
@@ -16,19 +19,27 @@ CRAWLER_CONFIGS = [
         "s3_key": "dynamic_programs/seoul_agi_education.json",
         "enabled": True,
     },
+    {
+        "name": "서울 임신출산 정보센터 (공지사항)",
+        "crawler_func": crawl_seoul_agi_notices,
+        "s3_key": "dynamic_programs/seoul_agi_notices.json",
+        "enabled": True,
+    },
+    {
+        "name": "아이사랑 (출산지원금-서울시)",
+        "crawler_func": crawl_childcare_support_fund,
+        "s3_key": "dynamic_programs/childcare_support_fund.json",
+        "enabled": True,
+    },
 ]
 
-# --- 로직(Logic) 영역 ---
+# --- 로직(Logic) 영역 (수정 불필요) ---
 
 
 def upload_to_s3(data, key):
-    """주어진 데이터를 JSON 형태로 S3에 업로드합니다."""
-    # [수정] S3_BUCKET_NAME 환경 변수가 없으면 'seoul-baby'를 기본값으로 사용합니다.
+    # (이전과 동일한 코드)
     bucket_name = os.environ.get("S3_BUCKET_NAME", "seoul-baby")
-
-    # [핵심 수정] AWS_REGION 환경 변수가 없어도 안정적으로 동작하도록 '서울 리전'을 명시합니다.
     s3_client = boto3.client("s3", region_name="ap-northeast-2")
-
     try:
         s3_client.put_object(
             Bucket=bucket_name,
@@ -44,6 +55,7 @@ def upload_to_s3(data, key):
 
 
 def main():
+    # (이전과 동일한 코드)
     print("=" * 60)
     print("👶 서울시 임신/출산/육아 정보 통합 크롤링을 시작합니다.")
     print(f"   시작 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -65,17 +77,13 @@ def main():
         except Exception as e:
             print(f"🔥 '{config['name']}' 크롤링 중 심각한 오류 발생: {e}")
             summary[config["name"]] = {"status": "failed", "error": str(e)}
-
         upload_data = {
             "source": config["name"],
             "data": crawled_data,
             "count": len(crawled_data),
             "updated_at": datetime.now().isoformat(),
         }
-
-        # [핵심 수정] 주석을 해제하여 S3 업로드 기능을 활성화합니다.
         upload_to_s3(upload_data, config["s3_key"])
-
     print("\n" + "=" * 60)
     print("✨ 크롤링 완료 요약")
     print("=" * 60)
